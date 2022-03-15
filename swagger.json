@@ -1,0 +1,854 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "GoGram"
+    },
+    "tags": [
+        {
+            "name": "authorization"
+        },
+        {
+            "name": "profile"
+        },
+        {
+            "name": "post",
+            "description": "Posts (publications) manipulation"
+        },
+        {
+            "name": "general"
+        }
+    ],
+    "host": "localhost:3000",
+    "basePath": "/",
+    "paths": {
+        "/signup": {
+            "post": {
+                "tags": [
+                    "authorization"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "email",
+                                "username",
+                                "password"
+                            ],
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "username": {
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "Should be encrypted on the frontend"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "picture": {
+                                    "type": "string",
+                                    "description": "Binary object that represents image"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "accessToken": {
+                                    "type": "string",
+                                    "description": "JWT"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "errorCode": {
+                                    "type": "number",
+                                    "description": "1 for username conflict nad 2 for email conflict"
+                                },
+                                "errorMessage": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "description": "Wrong password or username"
+                    },
+                    "500": {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Unknown error"
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "tags": ["authorization"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "username",
+                                "password"
+                            ],
+                            "properties": {
+                                "username": {
+                                    "type": "string",
+                                    "description": "Also accepts email"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "Should be encrypted on the frontend"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "accessToken": {
+                                    "type": "string",
+                                    "description": "JWT"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Wrong password or username"
+                    }
+                }
+            }
+        },
+        "/password/send_code": {
+            "post": {
+                "tags": ["password recovery"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "email"
+                            ],
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Sends verification code to the email. To recover password this code should be used for POST /password/verify_code next",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/password/verify_code": {
+            "post": {
+                "tags": ["password recovery"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "email",
+                                "code"
+                            ],
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "code": {
+                                    "type": "string",
+                                    "description": "The verification code, received to the email"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Sends verification code to the email. To recover password this code should be used for POST /password/verify_code next",
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "null"
+                        },
+                        "description": "OK"
+                    },
+                    "400": {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Wron password or username"
+                    }
+                }
+            }
+        },
+        "/password": {
+            "post": {
+                "tags": ["password recovery"],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "email",
+                                "newPassword"
+                            ],
+                            "properties": {
+                                "email": {
+                                    "type": "string"
+                                },
+                                "password": {
+                                    "type": "string",
+                                    "description": "Should be encrypted on the frontend"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    }
+                },
+                "description": "Creates new password if the user have verified their code"
+            }
+        },
+        "/post": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "image",
+                        "required": true,
+                        "description": "Post image",
+                        "type": "file"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "description",
+                        "required": true,
+                        "description": "The description of the post",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "description": {
+                                    "type": "string"
+                                },
+                                "image": {
+                                    "type": "string",
+                                    "description": "Image name, that can be used to get image using GET /image"
+                                },
+                                "authorName": {
+                                    "type": "string"
+                                },
+                                "date": {
+                                    "type": "number",
+                                    "description": "The date of creation in milliseconds"
+                                },
+                                "id": {
+                                    "type": "string",
+                                    "description": "The post id that can be used to get info about the post using GET /post"
+                                }
+                            }
+                        },
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Unknown error"
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "post"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "lastPostId": {
+                                    "type": "string",
+                                    "description": "The id of the last seen by user post. All returned posts will be older"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "posts": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string"
+                                            },
+                                            "authorName": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": "string"
+                                            },
+                                            "image": {
+                                                "type": "string"
+                                            },
+                                            "date": {
+                                                "type": "number"
+                                            },
+                                            "likes": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "date": {
+                                                            "type": "number"
+                                                        },
+                                                        "authorName": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            "comments": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "date": {
+                                                            "type": "number"
+                                                        },
+                                                        "authorName": {
+                                                            "type": "string"
+                                                        },
+                                                        "content": {
+                                                            "type": "string"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "post"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "postId": {
+                                    "type": "string",
+                                    "description": "The id of the post that you want to delete"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "403": {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Access denied"
+                    },
+                    "400": {
+                        "description": "Unknown error"
+                    }
+                }
+            }
+        },
+        "/post/comment": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "postId": {
+                                    "type": "string"
+                                },
+                                "comment": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Failed to create comment"
+                    }
+                }
+            }
+        },
+        "/post/like": {
+            "post": {
+                "tags": [
+                    "post"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "postId": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successfully liked"
+                    },
+                    "200": {
+                        "description": "Already liked"
+                    },
+                    "400": {
+                        "description": "The post doesn't exist"
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "username": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                },
+                                "picture": {
+                                    "type": "string",
+                                    "description": "Name of user's profile picture"
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/profile/performance": {
+            "get": {
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "date": {
+                                    "type": "number",
+                                    "description": "Time point, from which the performance is captured"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "posts": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "posts": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "string"
+                                                        },
+                                                        "authorName": {
+                                                            "type": "string"
+                                                        },
+                                                        "description": {
+                                                            "type": "string"
+                                                        },
+                                                        "image": {
+                                                            "type": "string"
+                                                        },
+                                                        "date": {
+                                                            "type": "number"
+                                                        },
+                                                        "likes": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "date": {
+                                                                        "type": "number"
+                                                                    },
+                                                                    "authorName": {
+                                                                        "type": "string"
+                                                                    }
+                                                                }
+                                                            }
+                                                        },
+                                                        "comments": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "object",
+                                                                "properties": {
+                                                                    "date": {
+                                                                        "type": "number"
+                                                                    },
+                                                                    "authorName": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "content": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "postId": {
+                                                                        "type": "string"
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "likes": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "date": {
+                                                "type": "number"
+                                            },
+                                            "authorName": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                },
+                                "comments": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "date": {
+                                                "type": "number"
+                                            },
+                                            "authorName": {
+                                                "type": "string"
+                                            },
+                                            "content": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/profile/description": {
+            "post": {
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "postId": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Change profile description",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/profile/picture": {
+            "post": {
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "formData",
+                        "name": "picture",
+                        "required": true,
+                        "type": "file"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "description": "Set profile picture"
+            },
+            "get": {
+                "tags": [
+                    "profile"
+                ],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "image": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/image": {
+            "get": {
+                "tags": ["general"],
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "authorization",
+                        "description": "JWT",
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "filename": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "image": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "number"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
